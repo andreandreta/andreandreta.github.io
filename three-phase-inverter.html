@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#eef2ef">
-  <title>Vector Lab | Space Vector Modulation</title>
+  <title>Dr. G Lab | Tools for learning power inverters</title>
   <style>
     :root {
       color-scheme: light;
@@ -19,6 +19,8 @@
       --orange: #e36a42;
       --blue: #2874a5;
       --yellow: #e0ad35;
+      --yellow-soft: #fbf0d2;
+      --yellow-ink: #7a5408;
       --red: #c84e4e;
       --mono: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
       --serif: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
@@ -40,9 +42,10 @@
       min-height: 72px; display: flex; align-items: center; justify-content: space-between;
       border-bottom: 1px solid var(--ink); gap: 20px;
     }
-    .brand { display: flex; align-items: center; gap: 12px; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+    .sym { text-transform: none; }
+    .brand { white-space: nowrap; display: flex; align-items: center; gap: 12px; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
     .brand-mark { width: 27px; height: 27px; display: grid; place-items: center; background: var(--ink); color: var(--paper); font-size: 12px; }
-    .top-meta { color: var(--muted); font-size: 11px; text-align: right; }
+    .org-logo { display: block; height: 54px; width: auto; margin: 8px 0; }
     .intro { padding: 25px 0 20px; display: flex; align-items: end; justify-content: space-between; gap: 20px; }
     .eyebrow { color: var(--green); text-transform: uppercase; font-weight: 700; letter-spacing: .12em; font-size: 10px; }
     h1 { font-family: var(--serif); font-size: clamp(29px, 4vw, 45px); line-height: 1.02; letter-spacing: 0; font-weight: 500; margin: 7px 0 0; }
@@ -51,6 +54,13 @@
     .lesson-tab { padding: 13px 18px; border: 0; border-right: 1px solid var(--line); border-bottom: 3px solid transparent; background: transparent; color: var(--muted); font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; cursor: pointer; }
     .lesson-tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--green); }
     .lesson-tab:focus-visible, .vector-choice:focus-visible { outline: 2px solid var(--green); outline-offset: -2px; }
+    .game-tab { display: inline-flex; align-items: center; gap: 7px; background: var(--yellow-soft); color: var(--yellow-ink); }
+    #tab-game { margin-left: auto; border-left: 1px solid var(--line); }
+    #tab-grid-game { border-right: 0; }
+    .game-tab:hover { background: #f8e6b3; }
+    .game-tab[aria-selected="true"] { color: var(--ink); background: #f6e0a0; border-bottom-color: var(--yellow); }
+    .game-tab:focus-visible { outline-color: var(--yellow-ink); }
+    .tab-icon { width: 17px; height: 12px; flex: 0 0 auto; }
     .lesson-page[hidden], .transform-lesson[hidden] { display: none; }
     .workspace { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(310px, .75fr); border-top: 1px solid var(--ink); border-left: 1px solid var(--ink); background: var(--panel); }
     .transform-lesson { border: 1px solid var(--ink); border-top: 0; background: var(--panel); }
@@ -201,6 +211,48 @@
     .result-line.generated { height: 0; border-top: 2px dashed var(--orange); background: transparent; }
     #gamePhaseResultPlot { width: 100%; height: auto; display: block; }
     .result-card-note { padding-top: 8px; border-top: 1px solid var(--line); color: var(--muted); font-size: 9px; line-height: 1.5; }
+    .grid-game { border: 1px solid var(--ink); border-top: 0; background: var(--panel); }
+    .grid-game[hidden] { display: none; }
+    .grid-game-intro { padding: 12px 17px; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 10px; line-height: 1.6; }
+    .grid-game-intro strong { color: var(--ink); }
+    .grid-game-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+    .grid-current-panel { min-width: 0; }
+    .grid-game-chart { padding: 10px 15px; background-color: #f7faf7; background-image: linear-gradient(#e9efeb 1px, transparent 1px), linear-gradient(90deg, #e9efeb 1px, transparent 1px); background-size: 24px 24px; }
+    #gridCurrentPlot { width: 100%; height: auto; display: block; }
+    .grid-circuit-panel { min-width: 0; border-left: 1px solid var(--line); }
+    #gridBridgePlot { width: 100%; height: auto; display: block; }
+    .grid-switch { transition: fill .12s ease, stroke .12s ease; }
+    .grid-game-controls { display: grid; grid-template-columns: minmax(250px, .7fr) minmax(0, 1.3fr); border-top: 1px solid var(--ink); }
+    .grid-game-settings { padding: 15px 18px; border-right: 1px solid var(--line); }
+    .grid-game-settings input { width: 100%; accent-color: var(--green); }
+    .grid-game-setting { margin-bottom: 12px; }
+    .grid-game-setting:last-child { margin-bottom: 0; }
+    .grid-game-setting label { display: block; margin-bottom: 6px; color: var(--muted); font-size: 9px; font-weight: 700; text-transform: uppercase; }
+    .grid-game-setting output { display: block; margin-top: 4px; color: var(--green); font-size: 11px; font-weight: 700; }
+    .grid-command-area { padding: 14px 18px; }
+    .grid-commands { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    .grid-command { min-height: 56px; padding: 8px; border: 1px solid var(--line); background: transparent; color: var(--ink); cursor: pointer; }
+    .grid-command:hover, .grid-command[aria-pressed="true"] { border-color: var(--green); background: var(--green-soft); }
+    .grid-command[aria-pressed="true"] { box-shadow: inset 0 -3px var(--green); }
+    .grid-command-name { display: block; font-size: 12px; font-weight: 700; }
+    .grid-command-key { display: block; margin-top: 5px; color: var(--muted); font-size: 9px; }
+    .grid-game-status { min-height: 22px; margin-top: 9px; color: var(--muted); font-size: 10px; }
+    .grid-game-status.burned { color: #b53131; font-weight: 700; }
+    .grid-game-metrics { display: flex; flex-wrap: wrap; gap: 18px; margin-top: 10px; color: var(--muted); font-size: 9px; }
+    .grid-game-metrics strong { margin-left: 4px; color: var(--ink); font-size: 12px; }
+    .grid-model-note { padding: 10px 16px; border-top: 1px solid var(--line); color: var(--muted); font-size: 9px; line-height: 1.5; }
+    .grid-result-card { width: min(940px, 100%); }
+    .grid-result-message { margin: 12px 0; color: var(--muted); font-family: var(--serif); font-size: 18px; line-height: 1.4; }
+    #gridResultPlot { width: 100%; height: auto; display: block; }
+    .result-line.grid-ref { background: var(--green); }
+    .result-line.grid-current { background: var(--blue); }
+    .result-line.grid-bridge { background: var(--ink); height: 1px; }
+    .result-line.grid-voltage { height: 0; border-top: 2px dashed var(--orange); background: transparent; }
+    .result-chart-legend { flex-wrap: wrap; }
+    .grid-result-card .result-summary { grid-template-columns: 1.3fr repeat(4, minmax(0, 1fr)); }
+    .result-stat-value.over-limit, .result-card-kicker.bad { color: var(--red); }
+    .result-stat-value.within-limit { color: var(--green); }
+    .grid-result-note { padding-top: 8px; border-top: 1px solid var(--line); color: var(--muted); font-size: 9px; line-height: 1.5; }
     @media (max-width: 700px) {
       .result-card-head { align-items: flex-start; flex-direction: column; }
       .result-mood { align-items: flex-start; }
@@ -209,6 +261,12 @@
       .result-stat:nth-child(2) { border-right: 0; }
       .result-stat:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
       .result-chart-head { align-items: flex-start; flex-direction: column; }
+      .grid-result-card .result-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .grid-result-card .result-stat { padding-left: 0; border-right: 0; border-bottom: 1px solid var(--line); }
+      .grid-result-card .result-stat:first-child { grid-column: 1 / -1; }
+      .grid-result-card .result-stat:nth-child(2n) { border-right: 1px solid var(--line); }
+      .grid-result-card .result-stat:nth-child(2n+3) { padding-left: 15px; }
+      .grid-result-card .result-stat:nth-last-child(-n+2) { border-bottom: 0; }
     }
     .vector-panel { min-width: 0; border-right: 1px solid var(--ink); border-bottom: 1px solid var(--ink); }
     .side-panel { min-width: 0; border-right: 1px solid var(--ink); border-bottom: 1px solid var(--ink); }
@@ -287,11 +345,16 @@
       .workspace { grid-template-columns: minmax(0, 1fr) minmax(285px, .8fr); }
       .game-layout { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
       .game-controls { grid-column: 1 / -1; border-left: 0; border-top: 1px solid var(--line); }
+      .grid-game-layout { grid-template-columns: 1fr; }
+      .grid-circuit-panel { border-left: 0; border-top: 1px solid var(--line); }
+      .grid-game-controls { grid-template-columns: 1fr; }
+      .grid-game-settings { border-right: 0; border-bottom: 1px solid var(--line); }
       .plot-wrap { padding-inline: 8px; }
     }
     @media (max-width: 700px) {
       .shell { padding: 0 12px 24px; }
       .topbar { min-height: 60px; }
+      .org-logo { height: 40px; }
       .intro { display: block; padding: 20px 0 16px; }
       .intro-note { margin-top: 10px; max-width: 480px; }
       .lesson-tabs { overflow-x: auto; }
@@ -317,6 +380,8 @@
       .game-controls { border-left: 0; border-top: 1px solid var(--line); }
       .game-controls { grid-column: auto; }
       .game-circuit-wrap { border-left: 0; border-top: 1px solid var(--line); }
+      .grid-commands { gap: 5px; }
+      .grid-command { padding-inline: 4px; }
       .workspace { grid-template-columns: 1fr; }
       .wave-panel { grid-column: auto; }
       #spacePlot { max-height: 390px; }
@@ -341,18 +406,19 @@
 <body>
   <main class="shell fade-in">
     <header class="topbar">
-      <div class="brand"><span class="brand-mark" aria-hidden="true">V</span><span>Vector Lab</span></div>
-      <div class="top-meta">POWER CONVERSION / TEACHING INSTRUMENT&nbsp;&nbsp; 01</div>
+      <div class="brand"><span class="brand-mark" aria-hidden="true">G</span><span>Dr. G Lab</span></div>
+      <img class="org-logo" src="data:image/png;base64,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" width="362" height="162" alt="UFR PhITEM, Université Grenoble Alpes">
     </header>
     <section class="intro" aria-labelledby="page-title">
-      <div><div class="eyebrow">Power electronics / lesson 01</div><h1 id="page-title">From three phases to αβ</h1></div>
-      <div class="intro-note">Start by mapping instantaneous phase voltages into two stationary axes, then follow that vector into space vector modulation.</div>
+      <div><div class="eyebrow">Power electronics for UGA PhITEM L3</div><h1 id="page-title">Tools for learning power inverters</h1></div>
+      <div class="intro-note">Five interactive lessons: the Clarke transform, space vector modulation and the spectrum of an RL load, then two games where you play the modulator and the current controller.</div>
     </section>
     <nav class="lesson-tabs" role="tablist" aria-label="Power electronics lessons">
-      <button class="lesson-tab" id="tab-clarke" type="button" role="tab" aria-selected="true" aria-controls="clarkeLesson" tabindex="0">01 / abc to αβ transform</button>
+      <button class="lesson-tab" id="tab-clarke" type="button" role="tab" aria-selected="true" aria-controls="clarkeLesson" tabindex="0">01 / abc to <span class="sym">αβ</span> transform</button>
       <button class="lesson-tab" id="tab-svm" type="button" role="tab" aria-selected="false" aria-controls="svmLesson" tabindex="-1">02 / Space vector modulation</button>
       <button class="lesson-tab" id="tab-spectrum" type="button" role="tab" aria-selected="false" aria-controls="spectrumLesson" tabindex="-1">03 / RL load spectrum</button>
-      <button class="lesson-tab" id="tab-game" type="button" role="tab" aria-selected="false" aria-controls="gameLesson" tabindex="-1">04 / Human modulator</button>
+      <button class="lesson-tab game-tab" id="tab-game" type="button" role="tab" aria-selected="false" aria-controls="gameLesson" tabindex="-1"><svg class="tab-icon" viewBox="0 0 24 16" aria-hidden="true" focusable="false"><path d="M6 1h12a5 5 0 0 1 4.9 6l-1 5.2a2.5 2.5 0 0 1-4.3 1.2L15 11H9l-2.6 2.4a2.5 2.5 0 0 1-4.3-1.2L1.1 7A5 5 0 0 1 6 1z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M6 4.5v4M4 6.5h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="16.5" cy="5" r="1.2" fill="currentColor"/><circle cx="18.8" cy="7.8" r="1.2" fill="currentColor"/></svg>04 / Human modulator</button>
+      <button class="lesson-tab game-tab" id="tab-grid-game" type="button" role="tab" aria-selected="false" aria-controls="gridGameLesson" tabindex="-1"><svg class="tab-icon" viewBox="0 0 24 16" aria-hidden="true" focusable="false"><path d="M6 1h12a5 5 0 0 1 4.9 6l-1 5.2a2.5 2.5 0 0 1-4.3 1.2L15 11H9l-2.6 2.4a2.5 2.5 0 0 1-4.3-1.2L1.1 7A5 5 0 0 1 6 1z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M6 4.5v4M4 6.5h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="16.5" cy="5" r="1.2" fill="currentColor"/><circle cx="18.8" cy="7.8" r="1.2" fill="currentColor"/></svg>05 / Grid current control</button>
     </nav>
     <div class="lesson-page" id="svmLesson" role="tabpanel" aria-labelledby="tab-svm" hidden>
     <section class="workspace" aria-label="Space vector modulation controls and plots">
@@ -369,7 +435,7 @@
         <div class="panel-head"><span class="panel-title" id="settings-title">Operating point</span><span class="panel-tag" id="modeReadout">LINEAR SVM</span></div>
         <div class="controls">
           <div class="control-row">
-            <div><label class="control-label" for="angle">Reference angle θ</label><input id="angle" type="range" min="0" max="359.9" step="0.1" value="24" aria-describedby="angle-hint"><div class="control-hint" id="angle-hint">Electrical angle measured from the α axis</div></div>
+            <div><label class="control-label" for="angle">Reference angle <span class="sym">θ</span></label><input id="angle" type="range" min="0" max="359.9" step="0.1" value="24" aria-describedby="angle-hint"><div class="control-hint" id="angle-hint">Electrical angle measured from the α axis</div></div>
             <output class="readout" id="angleOut" for="angle">24.0°</output>
           </div>
           <div class="control-row">
@@ -392,7 +458,7 @@
         </div>
         <div class="notice" id="zeroNotice" role="status">At zero modulation, the reference is the origin and active-vector dwell times are zero.</div>
         <div class="sequence">
-          <div class="sequence-label">Symmetric 7-segment sequence <span style="color:var(--muted);font-weight:400">/ one Ts · μs</span></div>
+          <div class="sequence-label">Symmetric 7-segment sequence <span style="color:var(--muted);font-weight:400">/ one <span class="sym">Ts · μs</span></span></div>
           <div class="sequence-track" id="sequenceTrack" aria-label="Switching states across one period"></div>
           <div class="sequence-note" id="sequenceNote">Zero-vector time is split equally between 000 and 111 to center the pulse pattern.</div>
         </div>
@@ -449,15 +515,15 @@
             <button class="transform-preset" type="button" data-transform-preset="zero">Pure zero sequence</button>
           </div>
           <div class="transform-results" aria-live="polite">
-            <div class="transform-result"><span class="transform-result-label">α axis</span><output class="transform-result-value" id="alphaValue">—</output></div>
-            <div class="transform-result"><span class="transform-result-label">β axis</span><output class="transform-result-value" id="betaValue">—</output></div>
+            <div class="transform-result"><span class="transform-result-label"><span class="sym">α</span> axis</span><output class="transform-result-value" id="alphaValue">—</output></div>
+            <div class="transform-result"><span class="transform-result-label"><span class="sym">β</span> axis</span><output class="transform-result-value" id="betaValue">—</output></div>
             <div class="transform-result"><span class="transform-result-label">Zero seq.</span><output class="transform-result-value" id="zeroValue">—</output></div>
           </div>
         </aside>
       </div>
       <div class="transform-equations" aria-live="polite">
-        <div class="transform-equation"><div class="equation-label">Projection onto α</div><div class="equation">v<sub>α</sub> = ⅔ [v<sub>a</sub> − ½v<sub>b</sub> − ½v<sub>c</sub>]</div><div class="equation-substitution" id="alphaSubstitution"></div></div>
-        <div class="transform-equation"><div class="equation-label">Projection onto β</div><div class="equation">v<sub>β</sub> = (v<sub>b</sub> − v<sub>c</sub>) / √3</div><div class="equation-substitution" id="betaSubstitution"></div></div>
+        <div class="transform-equation"><div class="equation-label">Projection onto <span class="sym">α</span></div><div class="equation">v<sub>α</sub> = ⅔ [v<sub>a</sub> − ½v<sub>b</sub> − ½v<sub>c</sub>]</div><div class="equation-substitution" id="alphaSubstitution"></div></div>
+        <div class="transform-equation"><div class="equation-label">Projection onto <span class="sym">β</span></div><div class="equation">v<sub>β</sub> = (v<sub>b</sub> − v<sub>c</sub>) / √3</div><div class="equation-substitution" id="betaSubstitution"></div></div>
         <div class="transform-equation"><div class="equation-label">Common-mode component</div><div class="equation">v<sub>0</sub> = ⅓ [v<sub>a</sub> + v<sub>b</sub> + v<sub>c</sub>]</div><div class="equation-substitution" id="zeroSubstitution"></div></div>
       </div>
       <div class="transform-inverse">Recover the phase values: v<sub>a</sub> = v<sub>α</sub> + v<sub>0</sub>, &nbsp; v<sub>b</sub> = −½v<sub>α</sub> + √3⁄2 v<sub>β</sub> + v<sub>0</sub>, &nbsp; v<sub>c</sub> = −½v<sub>α</sub> − √3⁄2 v<sub>β</sub> + v<sub>0</sub>.</div>
@@ -582,7 +648,69 @@
         </section>
       </div>
     </section>
-    <footer class="foot"><span><strong>Model:</strong> two-level, three-phase voltage-source inverter · ideal switches</span><span>Clarke scaling: amplitude-invariant (2/3)</span></footer>
+    <section class="grid-game" id="gridGameLesson" role="tabpanel" aria-labelledby="tab-grid-game" hidden>
+      <div class="panel-head"><span class="panel-title">Grid current control / single-phase full bridge</span><span class="panel-tag">50 Hz GRID · ONE CYCLE IN 20 S</span></div>
+      <div class="grid-game-intro"><strong>Inject current into the grid.</strong> Command the full bridge to apply positive voltage, zero voltage, or negative voltage. Track the reference current without crossing the overcurrent limit. More inductance gives the current more inertia and makes it easier to steer.</div>
+      <div class="grid-game-layout">
+        <section class="grid-current-panel" aria-labelledby="gridCurrentTitle">
+          <div class="panel-head"><span class="panel-title" id="gridCurrentTitle">Grid current tracking</span><span class="panel-tag">REFERENCE VS INJECTED</span></div>
+          <div class="grid-game-chart"><svg id="gridCurrentPlot" viewBox="0 0 760 360" role="img" aria-label="Reference and injected grid current with the overcurrent limit"></svg></div>
+        </section>
+        <section class="grid-circuit-panel" aria-labelledby="gridCircuitTitle">
+          <div class="panel-head"><span class="panel-title" id="gridCircuitTitle">Full-bridge switch positions</span><output id="gridBridgeState" class="game-circuit-state">ZERO · Q1/Q3</output></div>
+          <div class="grid-game-chart"><svg id="gridBridgePlot" viewBox="0 0 760 360" role="img" aria-label="Single-phase full bridge connected through an inductor to the AC grid with the selected switches highlighted"></svg></div>
+        </section>
+      </div>
+      <div class="grid-game-controls">
+        <div class="grid-game-settings">
+          <div class="grid-game-setting"><label for="gridInductance">Filter inductance L</label><input id="gridInductance" type="range" min="2" max="30" step="0.5" value="12"><output id="gridInductanceOut">12 mH</output></div>
+          <div class="grid-game-setting"><label for="gridReference">Reference current peak</label><input id="gridReference" type="range" min="3" max="10" step="0.5" value="7"><output id="gridReferenceOut">7.0 A</output></div>
+        </div>
+        <div class="grid-command-area">
+          <div class="game-actions"><button class="game-action" id="gridGameStart" type="button">Start round</button><button class="game-action secondary" id="gridGameReset" type="button">Reset</button></div>
+          <div class="grid-commands" role="group" aria-label="Full bridge voltage commands">
+            <button class="grid-command" type="button" data-grid-command="1" aria-pressed="false"><span class="grid-command-name">+Vdc</span><span class="grid-command-key">Numpad 6 / ↑</span></button>
+            <button class="grid-command" type="button" data-grid-command="0" aria-pressed="true"><span class="grid-command-name">0</span><span class="grid-command-key">Numpad 5 / Space</span></button>
+            <button class="grid-command" type="button" data-grid-command="-1" aria-pressed="false"><span class="grid-command-name">−Vdc</span><span class="grid-command-key">Numpad 4 / ↓</span></button>
+          </div>
+          <div class="grid-game-status" id="gridGameStatus" aria-live="polite">READY · Select a bridge voltage, then start the round.</div>
+          <div class="grid-game-metrics" aria-live="polite"><span>Time<strong id="gridGameTime">20.0 s</strong></span><span>Tracking<strong id="gridGameAccuracy">0%</strong></span><span>Grid current<strong id="gridCurrentReadout">0.00 A</strong></span><span>Limit<strong>±15 A</strong></span></div>
+        </div>
+      </div>
+      <div class="grid-model-note">Teaching-time simulation: 50 Hz grid slowed 1000× for manual control, so one 20 ms grid cycle lasts 20 s. Series model: L di/dt = vbridge − vgrid − Ri, with R = 0.5 Ω, Vdc = 400 V, and a ±15 A trip limit.</div>
+    </section>
+    <div class="game-result-backdrop" id="gridResult" hidden>
+      <section class="game-result grid-result-card" role="dialog" aria-modal="true" aria-labelledby="gridResultTitle" aria-describedby="gridResultMessage">
+        <div class="result-card-head">
+          <div class="result-mood">
+            <svg class="result-face" id="gridResultFace" viewBox="0 0 120 120" role="img" aria-label="Grid current round result face">
+              <circle cx="60" cy="60" r="54" fill="#f1cf68" stroke="#17231f" stroke-width="2" />
+              <circle cx="43" cy="51" r="4" fill="#17231f" />
+              <circle cx="77" cy="51" r="4" fill="#17231f" />
+              <path class="face-brow" d="M37 39 L50 39 M70 39 L83 39" fill="none" stroke="#17231f" stroke-width="3" stroke-linecap="round" />
+              <path class="face-mouth" id="gridResultMouth" d="M35 72 Q60 98 85 72" />
+            </svg>
+            <div><div class="result-card-kicker" id="gridResultKicker">Grid current control / cycle complete</div><h2 class="result-card-title" id="gridResultTitle">Grid report</h2></div>
+          </div>
+          <button class="game-action secondary" id="closeGridResult" type="button">Back to game</button>
+        </div>
+        <p class="grid-result-message" id="gridResultMessage"></p>
+        <div class="result-summary">
+          <div class="result-stat"><span class="result-stat-label" id="gridResultThdLabel">Current THD · limit 5%</span><output id="gridResultThd" class="result-stat-value">—</output></div>
+          <div class="result-stat"><span class="result-stat-label">Tracking score</span><output id="gridResultScore" class="result-stat-value">0%</output></div>
+          <div class="result-stat"><span class="result-stat-label">Peak current</span><output id="gridResultPeak" class="result-stat-value">0 A</output></div>
+          <div class="result-stat"><span class="result-stat-label">Inductance</span><output id="gridResultInductance" class="result-stat-value">12 mH</output></div>
+          <div class="result-stat"><span class="result-stat-label">Bridge events</span><output id="gridResultChanges" class="result-stat-value">0</output></div>
+        </div>
+        <div class="result-chart-head">
+          <span class="result-chart-title">Grid current and bridge voltage · one 50 Hz cycle in real time</span>
+          <span class="result-chart-legend"><span><i class="result-line grid-ref"></i>Reference current</span><span><i class="result-line grid-current"></i>Injected current</span><span><i class="result-line grid-bridge"></i>Bridge voltage</span><span><i class="result-line grid-voltage"></i>Grid voltage</span></span>
+        </div>
+        <svg id="gridResultPlot" viewBox="0 0 1000 470" role="img" aria-label="Reference and injected grid current, bridge voltage and grid voltage over the completed grid cycle"></svg>
+        <div class="grid-result-note" id="gridResultNote">Time axis is real grid time: the round played this 20 ms cycle 1000× slower. Single-phase series RL model with ideal bridge switches; current trip limit ±15 A.</div>
+      </section>
+    </div>
+    <footer class="foot"><span><strong>Models:</strong> ideal switches · two-level three-phase inverter (lessons 01–04) · single-phase full bridge on the grid (lesson 05)</span><span>Clarke scaling: amplitude-invariant (2/3)</span></footer>
   </main>
 <script>
   const activeStates = ["100", "110", "010", "011", "001", "101"];
@@ -603,6 +731,8 @@
   const timeWindowInput = document.querySelector("#timeWindow");
   const gameSpeedInput = document.querySelector("#gameSpeed");
   const gameModulationInput = document.querySelector("#gameModulation");
+  const gridInductanceInput = document.querySelector("#gridInductance");
+  const gridReferenceInput = document.querySelector("#gridReference");
   const gameKeyMap = { Numpad6: "V1", Numpad9: "V2", Numpad7: "V3", Numpad4: "V4", Numpad1: "V5", Numpad3: "V6", Numpad5: "V0", Numpad8: "V7" };
   let spectrumMode = "voltage";
   let latestSpectrum = null;
@@ -616,6 +746,22 @@
   let gameAnimationFrame = 0;
   let gameWaveHistory = [];
   let gameRoundHistory = [];
+  let gridGameRunning = false;
+  let gridGameElapsed = 0;
+  let gridGameLastFrame = 0;
+  let gridGameAnimationFrame = 0;
+  let gridSimTime = 0;
+  let gridCurrent = 0;
+  let gridVoltageCommand = 0;
+  let gridQualityIntegral = 0;
+  let gridRoundTripped = false;
+  let gridSamples = [];
+  let gridRoundHistory = [];
+  let gridSwitchCount = 0;
+  let gridPeakCurrent = 0;
+  let gridTripTime = null;
+  let gridRoundInductance = 12;
+  let gridRoundReferencePeak = 7;
   const svgNS = "http://www.w3.org/2000/svg";
   const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
   const makeSvg = (tag, attributes = {}, text = "") => {
@@ -1148,6 +1294,389 @@
     svg.append(makeSvg("circle", { cx, cy, r: "4", fill: "#17231f" }));
   }
 
+  const gridTimeScale = .001;
+  const gridRoundDuration = 1 / (50 * gridTimeScale);
+  const gridResistance = .5;
+  const gridBusVoltage = 400;
+  const gridCurrentLimit = 15;
+  const gridThdLimit = 5;       // % · typical grid-code limit for inverter current distortion (IEEE 1547, IEC 61727)
+  const gridThdTerrible = 30;   // % · above this the results card roasts the waveform
+  const gridThdRoasts = [
+    "The grid operator just blocked your connection request.",
+    "Somewhere, a distribution transformer is humming in protest.",
+    "Your neighbours’ lights have started flickering.",
+    "The power quality analyser has asked for a day off.",
+    "The utility is drafting a strongly worded letter."
+  ];
+
+  // THD of the injected current over the recorded cycle (harmonics 2 and up; DC excluded).
+  // The current is piecewise linear between samples, so Parseval gives every harmonic at once:
+  // THD = sqrt(Irms² − Idc² − I1²) / I1.
+  function gridCurrentThd(history) {
+    if (history.length < 3) return null;
+    const omega = 2 * Math.PI * 50;
+    let squareIntegral = 0, dcIntegral = 0, cosIntegral = 0, sinIntegral = 0;
+    for (let index = 1; index < history.length; index++) {
+      const t0 = history[index - 1].simTime, t1 = history[index].simTime;
+      const i0 = history[index - 1].current, i1 = history[index].current;
+      const dt = t1 - t0;
+      squareIntegral += (i0 * i0 + i0 * i1 + i1 * i1) / 3 * dt;
+      dcIntegral += (i0 + i1) / 2 * dt;
+      cosIntegral += (i0 * Math.cos(omega * t0) + i1 * Math.cos(omega * t1)) / 2 * dt;
+      sinIntegral += (i0 * Math.sin(omega * t0) + i1 * Math.sin(omega * t1)) / 2 * dt;
+    }
+    const duration = history[history.length - 1].simTime - history[0].simTime;
+    const rmsSquared = squareIntegral / duration;
+    const dc = dcIntegral / duration;
+    const fundamentalRms = Math.hypot(2 * cosIntegral / duration, 2 * sinIntegral / duration) / Math.SQRT2;
+    if (fundamentalRms < 1e-6) return null;
+    return Math.sqrt(Math.max(0, rmsSquared - dc * dc - fundamentalRms * fundamentalRms)) / fundamentalRms * 100;
+  }
+
+  function gridReferenceAt(simTime) {
+    return Number(gridReferenceInput.value) * Math.sin(2 * Math.PI * 50 * simTime);
+  }
+
+  function drawGridBridge() {
+    const svg = document.querySelector("#gridBridgePlot");
+    const command = gridVoltageCommand;
+    const switches = command > 0 ? [1, 0, 0, 1] : command < 0 ? [0, 1, 1, 0] : [1, 0, 1, 0];
+    const switchNames = ["Q1", "Q2", "Q3", "Q4"];
+    document.querySelector("#gridBridgeState").textContent = command > 0 ? "+Vdc · Q1/Q4" : command < 0 ? "−Vdc · Q2/Q3" : "ZERO · Q1/Q3";
+    const positions = [
+      { x: 160, y: 76 }, { x: 160, y: 190 },
+      { x: 540, y: 76 }, { x: 540, y: 190 }
+    ];
+    svg.replaceChildren();
+    svg.append(makeSvg("text", { x: "18", y: "54", fill: "#17231f", "font-size": "12", "font-weight": "700" }, "DC+"));
+    svg.append(makeSvg("text", { x: "18", y: "294", fill: "#17231f", "font-size": "12", "font-weight": "700" }, "DC−"));
+    svg.append(makeSvg("line", { x1: "65", y1: "50", x2: "620", y2: "50", stroke: "#17231f", "stroke-width": "2" }));
+    svg.append(makeSvg("line", { x1: "65", y1: "290", x2: "620", y2: "290", stroke: "#17231f", "stroke-width": "2" }));
+    svg.append(makeSvg("text", { x: "625", y: "54", fill: "#65736d", "font-size": "11" }, `Vdc ${gridBusVoltage} V`));
+    const legXs = [160, 540];
+    legXs.forEach((x, index) => {
+      svg.append(makeSvg("line", { x1: x, y1: "50", x2: x, y2: "76", stroke: "#17231f", "stroke-width": "1.5" }));
+      svg.append(makeSvg("line", { x1: x, y1: "130", x2: x, y2: "162", stroke: "#17231f", "stroke-width": "1.5" }));
+      svg.append(makeSvg("line", { x1: x, y1: "244", x2: x, y2: "290", stroke: "#17231f", "stroke-width": "1.5" }));
+      svg.append(makeSvg("circle", { cx: x, cy: "162", r: "5", fill: "#e36a42" }));
+      svg.append(makeSvg("text", { x: x - 5, y: "184", fill: "#17231f", "font-size": "12", "font-weight": "700" }, index === 0 ? "A" : "B"));
+    });
+    positions.forEach((position, index) => {
+      const on = switches[index] === 1;
+      svg.append(makeSvg("rect", { x: position.x - 48, y: position.y, width: "96", height: "54", rx: "2", fill: on ? "#d9eee7" : "#f9fbf9", stroke: on ? (gridRoundTripped ? "#c84e4e" : "#14836b") : "#98a69e", "stroke-width": on ? "2.5" : "1.2", class: "grid-switch" }));
+      svg.append(makeSvg("line", { x1: position.x - 20, y1: position.y + 9, x2: position.x - 20, y2: position.y + 20, stroke: "#17231f", "stroke-width": "1.5" }));
+      svg.append(makeSvg("line", { x1: position.x - 20, y1: position.y + 33, x2: position.x - 20, y2: position.y + 45, stroke: "#17231f", "stroke-width": "1.5" }));
+      if (on) svg.append(makeSvg("line", { x1: position.x - 20, y1: position.y + 20, x2: position.x - 20, y2: position.y + 33, stroke: gridRoundTripped ? "#c84e4e" : "#14836b", "stroke-width": "2.5" }));
+      else svg.append(makeSvg("line", { x1: position.x - 25, y1: position.y + 33, x2: position.x - 15, y2: position.y + 21, stroke: "#17231f", "stroke-width": "1.5" }));
+      svg.append(makeSvg("text", { x: position.x + 2, y: position.y + 22, fill: "#17231f", "font-size": "11", "font-weight": "700" }, switchNames[index]));
+      svg.append(makeSvg("text", { x: position.x + 2, y: position.y + 40, fill: on ? (gridRoundTripped ? "#c84e4e" : "#14836b") : "#65736d", "font-size": "9", "font-weight": "700" }, on ? "ON" : "OFF"));
+    });
+    svg.append(makeSvg("line", { x1: "160", y1: "162", x2: "210", y2: "162", stroke: "#17231f", "stroke-width": "1.5" }));
+    svg.append(makeSvg("path", { d: "M 210 162 l 10 -9 l 10 18 l 10 -18 l 10 18 l 10 -18 l 10 18 l 10 -9", fill: "none", stroke: "#2874a5", "stroke-width": "2" }));
+    svg.append(makeSvg("text", { x: "250", y: "145", "text-anchor": "middle", fill: "#2874a5", "font-size": "10", "font-weight": "700" }, `L ${Number(gridInductanceInput.value).toFixed(1)} mH`));
+    svg.append(makeSvg("line", { x1: "280", y1: "162", x2: "320", y2: "162", stroke: "#17231f", "stroke-width": "1.5" }));
+    svg.append(makeSvg("rect", { x: "320", y: "150", width: "42", height: "24", fill: "#f9fbf9", stroke: "#17231f", "stroke-width": "1.5" }));
+    svg.append(makeSvg("text", { x: "341", y: "166", "text-anchor": "middle", fill: "#17231f", "font-size": "9" }, "R"));
+    svg.append(makeSvg("line", { x1: "362", y1: "162", x2: "414", y2: "162", stroke: "#17231f", "stroke-width": "1.5" }));
+    svg.append(makeSvg("circle", { cx: "445", cy: "162", r: "25", fill: "#f9fbf9", stroke: "#e36a42", "stroke-width": "2" }));
+    svg.append(makeSvg("path", { d: "M 427 162 C 433 145 439 179 445 162 S 457 145 463 162", fill: "none", stroke: "#e36a42", "stroke-width": "1.5" }));
+    svg.append(makeSvg("line", { x1: "470", y1: "162", x2: "540", y2: "162", stroke: "#17231f", "stroke-width": "1.5" }));
+    svg.append(makeSvg("text", { x: "445", y: "205", "text-anchor": "middle", fill: "#65736d", "font-size": "10" }, "50 Hz grid"));
+    svg.append(makeSvg("text", { x: "600", y: "118", fill: gridRoundTripped ? "#c84e4e" : "#14836b", "font-size": "12", "font-weight": "700" }, gridRoundTripped ? "OVERCURRENT TRIP" : `${command > 0 ? "+Vdc" : command < 0 ? "−Vdc" : "0 V"} · ${switches.map((on, index) => on ? switchNames[index] : "").filter(Boolean).join(" ")}`));
+  }
+
+  function drawGridCurrentPlot() {
+    const svg = document.querySelector("#gridCurrentPlot");
+    const left = 64, right = 744, top = 20, bottom = 326;
+    const plotWidth = right - left;
+    const windowSeconds = 10;
+    const windowStart = Math.max(0, gridGameElapsed - windowSeconds);
+    const windowEnd = windowStart + windowSeconds;
+    const samples = gridSamples.filter(sample => sample.time >= windowStart && sample.time <= windowEnd);
+    const xForTime = time => left + (time - windowStart) / windowSeconds * plotWidth;
+    const yForCurrent = current => bottom - (current + 18) / 36 * (bottom - top);
+    const labelScale = Math.max(1, Math.min(2.4, 760 / Math.max(svg.clientWidth, 1)));
+    svg.replaceChildren();
+    for (let tick = 0; tick <= 5; tick++) {
+      const time = windowStart + windowSeconds * tick / 5;
+      const x = xForTime(time);
+      svg.append(makeSvg("line", { x1: x, y1: top, x2: x, y2: bottom, stroke: "#e4eae6", "stroke-width": "1" }));
+      svg.append(makeSvg("text", { x, y: "348", "text-anchor": "middle", fill: "#65736d", "font-size": 9 * labelScale }, `${time.toFixed(0)} s`));
+    }
+    [-15, 0, 15].forEach(value => {
+      const y = yForCurrent(value);
+      svg.append(makeSvg("line", { x1: left, y1: y, x2: right, y2: y, stroke: value === 0 ? "#aebbb4" : "#c84e4e", "stroke-width": value === 0 ? "1" : "1.5", "stroke-dasharray": value === 0 ? "" : "5 4" }));
+      svg.append(makeSvg("text", { x: left - 8, y: y + 3, "text-anchor": "end", fill: value === 0 ? "#65736d" : "#c84e4e", "font-size": 9 * labelScale }, `${value} A`));
+    });
+    if (samples.length > 1) {
+      let referencePath = "", currentPath = "";
+      samples.forEach((sample, index) => {
+        const x = xForTime(sample.time);
+        referencePath += `${index ? "L" : "M"} ${x.toFixed(2)} ${yForCurrent(sample.reference).toFixed(2)} `;
+        currentPath += `${index ? "L" : "M"} ${x.toFixed(2)} ${yForCurrent(sample.current).toFixed(2)} `;
+      });
+      svg.append(makeSvg("path", { d: referencePath, fill: "none", stroke: "#14836b", "stroke-width": "2.5" }));
+      svg.append(makeSvg("path", { d: currentPath, fill: "none", stroke: gridRoundTripped ? "#c84e4e" : "#2874a5", "stroke-width": "2" }));
+    }
+    svg.append(makeSvg("text", { x: "14", y: (top + bottom) / 2, transform: `rotate(-90 14 ${(top + bottom) / 2})`, "text-anchor": "middle", fill: "#17231f", "font-size": 10 * labelScale }, "Current / A"));
+  }
+
+  function updateGridReadouts() {
+    document.querySelector("#gridInductanceOut").textContent = `${Number(gridInductanceInput.value).toFixed(1)} mH`;
+    document.querySelector("#gridReferenceOut").textContent = `${Number(gridReferenceInput.value).toFixed(1)} A`;
+    document.querySelector("#gridCurrentReadout").textContent = `${gridCurrent.toFixed(2)} A`;
+    document.querySelector("#gridGameTime").textContent = `${Math.max(0, gridRoundDuration - gridGameElapsed).toFixed(1)} s`;
+    const reference = gridReferenceAt(gridSimTime);
+    const instantQuality = clamp(1 - Math.abs(gridCurrent - reference) / 12, 0, 1);
+    const averageQuality = gridGameElapsed > 0 ? gridQualityIntegral / gridGameElapsed : 0;
+    document.querySelector("#gridGameAccuracy").textContent = `${(averageQuality * 100).toFixed(0)}%`;
+    document.querySelectorAll(".grid-command").forEach(button => button.setAttribute("aria-pressed", String(Number(button.dataset.gridCommand) === gridVoltageCommand)));
+    if (gridGameRunning) document.querySelector("#gridGameStatus").textContent = `GRID ${ (325 * Math.sin(2 * Math.PI * 50 * gridSimTime)).toFixed(0) } V · REFERENCE ${reference.toFixed(1)} A · TRACKING ${(instantQuality * 100).toFixed(0)}%`;
+  }
+
+  function setGridCommand(command) {
+    const nextCommand = Number(command);
+    if (gridGameRunning && nextCommand !== gridVoltageCommand) gridSwitchCount++;
+    gridVoltageCommand = nextCommand;
+    updateGridReadouts();
+    drawGridBridge();
+  }
+
+  function resetGridGame() {
+    gridGameRunning = false;
+    gridGameElapsed = 0;
+    gridGameLastFrame = 0;
+    gridSimTime = 0;
+    gridCurrent = 0;
+    gridQualityIntegral = 0;
+    gridRoundTripped = false;
+    gridSamples = [];
+    gridRoundHistory = [];
+    gridSwitchCount = 0;
+    gridPeakCurrent = 0;
+    gridTripTime = null;
+    cancelAnimationFrame(gridGameAnimationFrame);
+    gridVoltageCommand = 0;
+    setGridSettingsLocked(false);
+    document.querySelector("#gridResult").hidden = true;
+    document.querySelector("#gridGameStart").textContent = "Start round";
+    document.querySelector("#gridGameStatus").classList.remove("burned");
+    document.querySelector("#gridGameStatus").textContent = "READY · Select a bridge voltage, then start the round.";
+    document.querySelectorAll(".grid-command").forEach(button => button.setAttribute("aria-pressed", String(Number(button.dataset.gridCommand) === 0)));
+    updateGridReadouts();
+    drawGridCurrentPlot();
+    drawGridBridge();
+  }
+
+  function pauseGridGame() {
+    if (!gridGameRunning) return;
+    gridGameRunning = false;
+    cancelAnimationFrame(gridGameAnimationFrame);
+    document.querySelector("#gridGameStart").textContent = "Resume";
+    document.querySelector("#gridGameStatus").textContent = "PAUSED";
+  }
+
+  function startGridGame() {
+    if (gridGameRunning) {
+      gridGameRunning = false;
+      cancelAnimationFrame(gridGameAnimationFrame);
+      document.querySelector("#gridGameStart").textContent = "Resume";
+      document.querySelector("#gridGameStatus").textContent = "PAUSED";
+      return;
+    }
+    if (gridGameElapsed >= gridRoundDuration || gridRoundTripped) resetGridGame();
+    if (gridGameElapsed === 0) {
+      gridRoundInductance = Number(gridInductanceInput.value);
+      gridRoundReferencePeak = Number(gridReferenceInput.value);
+      gridRoundHistory = [{ simTime: 0, current: gridCurrent, reference: 0, command: gridVoltageCommand }];
+      setGridSettingsLocked(true);
+    }
+    document.querySelector("#gridResult").hidden = true;
+    gridGameRunning = true;
+    gridGameLastFrame = performance.now();
+    document.querySelector("#gridGameStart").textContent = "Pause";
+    document.querySelector("#gridGameStatus").textContent = "ROUND IN PROGRESS";
+    gridGameAnimationFrame = requestAnimationFrame(gridGameFrame);
+  }
+
+  function stopGridGame(burned) {
+    gridGameRunning = false;
+    gridRoundTripped = burned;
+    cancelAnimationFrame(gridGameAnimationFrame);
+    document.querySelector("#gridGameStart").textContent = burned ? "Reset to retry" : "Play again";
+    const status = document.querySelector("#gridGameStatus");
+    status.classList.toggle("burned", burned);
+    status.textContent = burned ? `TRIPPED · CONVERTER BURNED AT ${Math.abs(gridCurrent).toFixed(1)} A` : `ROUND COMPLETE · ${ (gridQualityIntegral / gridRoundDuration * 100).toFixed(0) }% AVERAGE TRACKING · THD ${(gridCurrentThd(gridRoundHistory) ?? 0).toFixed(1)}%`;
+    setGridSettingsLocked(false);
+    drawGridBridge();
+    showGridResult(burned);
+  }
+
+  function setGridSettingsLocked(locked) {
+    [gridInductanceInput, gridReferenceInput].forEach(input => { input.disabled = locked; });
+  }
+
+  function showGridResult(tripped) {
+    const score = gridQualityIntegral / gridRoundDuration * 100;
+    const thd = tripped ? null : gridCurrentThd(gridRoundHistory);
+    const thdText = thd === null ? "—" : thd > 999 ? "> 999%" : `${thd.toFixed(1)}%`;
+    const terrible = !tripped && (thd === null || thd > gridThdTerrible);
+    const compliant = !tripped && thd !== null && thd <= gridThdLimit;
+    const didWell = !tripped && !terrible && (compliant || score >= 65);
+    const tripMs = gridTripTime === null ? 0 : gridTripTime * 1000;
+    const resultFace = document.querySelector("#gridResultFace");
+    resultFace.classList.toggle("good", didWell);
+    resultFace.classList.toggle("awkward", !didWell);
+    resultFace.setAttribute("aria-label", didWell ? "Happy face for a strong score" : tripped ? "Awkward face for an overcurrent trip" : "Awkward face for a low score");
+    document.querySelector("#gridResultMouth").setAttribute("d", didWell ? "M 35 70 Q 60 98 85 70" : "M 36 83 Q 47 68 59 81 T 84 78");
+    const outcome = tripped ? "tripped" : terrible ? "terrible" : compliant ? "compliant" : didWell ? "good" : "wobbly";
+    const largestInductance = Number(gridInductanceInput.max);
+    const roast = gridThdRoasts[Math.floor(Math.random() * gridThdRoasts.length)];
+    const texts = {
+      tripped: ["overcurrent trip", "Pop! The converter tripped.", `The current reached ${gridCurrentLimit} A at ${tripMs.toFixed(1)} ms into the grid cycle and the protection shut the bridge down. Back off sooner by applying zero or the opposite voltage, or add inductance to slow the current down.`],
+      terrible: ["connection refused", "What a terrible waveform!", `The grid would never accept this kind of current: its THD is ${thdText} against a ${gridThdLimit}% limit. ${roast} ${gridRoundInductance >= largestInductance ? "Smaller, more frequent nudges would shrink the ripple." : "More inductance would smooth out the ripple."}`],
+      compliant: ["grid-code compliant", "Grid-code compliant. Are you a DSP?", `A current THD of ${thdText} is inside the ${gridThdLimit}% limit grid codes set for inverters. Your fingers just did the job of a current controller.`],
+      good: ["clean injection", "You nailed the sine wave!", `You tracked the reference well, but the current THD of ${thdText} is still above the ${gridThdLimit}% grid-code limit. Real inverters switch thousands of times per cycle, then filter, to get there.`],
+      wobbly: ["wobbly injection", "That current got wobbly!", `You got through the cycle, but the current drifted away from the reference. ${gridRoundInductance >= largestInductance ? "Switch earlier, before the current overshoots." : "A larger inductance slows the current down and gives you more time to react."}`]
+    }[outcome];
+    document.querySelector("#gridResultKicker").textContent = `Grid current control / ${texts[0]}`;
+    document.querySelector("#gridResultKicker").classList.toggle("bad", tripped || terrible);
+    document.querySelector("#gridResultTitle").textContent = texts[1];
+    document.querySelector("#gridResultMessage").textContent = texts[2];
+    const thdOutput = document.querySelector("#gridResultThd");
+    thdOutput.textContent = thdText;
+    thdOutput.classList.toggle("over-limit", thd !== null && thd > gridThdLimit);
+    thdOutput.classList.toggle("within-limit", compliant);
+    document.querySelector("#gridResultThdLabel").textContent = `Current THD · limit ${gridThdLimit}%`;
+    document.querySelector("#gridResultScore").textContent = `${score.toFixed(1)}%`;
+    document.querySelector("#gridResultPeak").textContent = `${gridPeakCurrent.toFixed(1)} A`;
+    document.querySelector("#gridResultInductance").textContent = `${gridRoundInductance.toFixed(1)} mH`;
+    document.querySelector("#gridResultChanges").textContent = String(gridSwitchCount);
+    document.querySelector("#gridResultNote").textContent = `Time axis is real grid time: the round played this cycle 1000× slower. Single-phase series RL model with ideal bridge switches; current trip limit ±${gridCurrentLimit} A. ${tripped ? "Tracking after the trip counts as zero; THD needs a complete cycle." : "THD covers all harmonics of the injected current over the cycle, DC excluded."}`;
+    document.querySelector("#gridResult").hidden = false;
+    drawGridResult();
+    document.querySelector("#closeGridResult").focus();
+  }
+
+  function closeGridResult() {
+    document.querySelector("#gridResult").hidden = true;
+    document.querySelector("#gridGameStart").focus();
+  }
+
+  function drawGridResult() {
+    const svg = document.querySelector("#gridResultPlot");
+    const textScale = Math.max(1, Math.min(3, 1000 / Math.max(svg.clientWidth, 1)));
+    const left = 40 + 34 * textScale, right = 994 - 15 * textScale;
+    const currentTop = 24, currentBottom = 268, voltageTop = 306, voltageBottom = 420;
+    const cycleMs = gridRoundDuration * gridTimeScale * 1000;
+    const currentRange = 18, voltageRange = 450;
+    const xForMs = ms => left + ms / cycleMs * (right - left);
+    const yForCurrent = current => currentBottom - (current + currentRange) / (2 * currentRange) * (currentBottom - currentTop);
+    const yForVoltage = voltage => voltageBottom - (voltage + voltageRange) / (2 * voltageRange) * (voltageBottom - voltageTop);
+    const analyticPath = (valueAt, yFor) => {
+      let path = "";
+      for (let index = 0; index <= 240; index++) {
+        const ms = cycleMs * index / 240;
+        path += `${index ? "L" : "M"} ${xForMs(ms).toFixed(2)} ${yFor(valueAt(ms / 1000)).toFixed(2)} `;
+      }
+      return path;
+    };
+    svg.replaceChildren();
+    for (let ms = 0; ms <= cycleMs + 1e-9; ms += 5) {
+      const x = xForMs(ms);
+      svg.append(makeSvg("line", { x1: x, y1: currentTop, x2: x, y2: voltageBottom, stroke: "#e4eae6", "stroke-width": "1" }));
+      svg.append(makeSvg("text", { x, y: "452", "text-anchor": "middle", fill: "#65736d", "font-size": 10 * textScale }, `${ms} ms`));
+    }
+    [-15, -10, -5, 0, 5, 10, 15].forEach(value => {
+      const y = yForCurrent(value);
+      const isLimit = Math.abs(value) === gridCurrentLimit;
+      svg.append(makeSvg("line", { x1: left, y1: y, x2: right, y2: y, stroke: isLimit ? "#c84e4e" : value === 0 ? "#aebbb4" : "#e4eae6", "stroke-width": isLimit ? "1.5" : "1", "stroke-dasharray": isLimit ? "5 4" : "" }));
+      if (isLimit || value === 0) svg.append(makeSvg("text", { x: left - 9, y: y + 3, "text-anchor": "end", fill: isLimit ? "#c84e4e" : "#65736d", "font-size": 9 * textScale }, `${value} A`));
+    });
+    [-gridBusVoltage, 0, gridBusVoltage].forEach(value => {
+      const y = yForVoltage(value);
+      svg.append(makeSvg("line", { x1: left, y1: y, x2: right, y2: y, stroke: value === 0 ? "#aebbb4" : "#e4eae6", "stroke-width": "1" }));
+      svg.append(makeSvg("text", { x: left - 9, y: y + 3, "text-anchor": "end", fill: "#65736d", "font-size": 9 * textScale }, `${value} V`));
+    });
+    const laneLabelX = 4 + 9 * textScale;
+    [[textScale > 1.6 ? "i" : "Current", (currentTop + currentBottom) / 2], [textScale > 1.6 ? "v" : "Voltage", (voltageTop + voltageBottom) / 2]].forEach(([label, y]) => {
+      svg.append(makeSvg("text", { x: laneLabelX, y, transform: `rotate(-90 ${laneLabelX} ${y})`, "text-anchor": "middle", fill: "#17231f", "font-size": 10 * textScale, "font-weight": "700" }, label));
+    });
+    if (gridTripTime !== null) {
+      const tripX = xForMs(gridTripTime * 1000);
+      svg.append(makeSvg("rect", { x: tripX, y: currentTop, width: Math.max(0, right - tripX), height: voltageBottom - currentTop, fill: "#c84e4e", opacity: ".08" }));
+      svg.append(makeSvg("line", { x1: tripX, y1: currentTop, x2: tripX, y2: voltageBottom, stroke: "#c84e4e", "stroke-width": "1.5", "stroke-dasharray": "4 3" }));
+      const labelOnLeft = tripX > right - 160;
+      svg.append(makeSvg("text", { x: tripX + (labelOnLeft ? -7 : 7), y: currentTop + 14 * textScale, "text-anchor": labelOnLeft ? "end" : "start", fill: "#c84e4e", "font-size": 10 * textScale, "font-weight": "700" }, `TRIP · ${(gridTripTime * 1000).toFixed(1)} ms`));
+    }
+    svg.append(makeSvg("path", { d: analyticPath(t => 325 * Math.sin(2 * Math.PI * 50 * t), yForVoltage), fill: "none", stroke: "#e36a42", "stroke-width": "1.8", "stroke-dasharray": "6 4" }));
+    svg.append(makeSvg("path", { d: analyticPath(t => gridRoundReferencePeak * Math.sin(2 * Math.PI * 50 * t), yForCurrent), fill: "none", stroke: "#14836b", "stroke-width": "2.5" }));
+    const history = gridRoundHistory;
+    if (history.length > 1) {
+      let bridgePath = `M ${xForMs(0).toFixed(2)} ${yForVoltage(history[1].command * gridBusVoltage).toFixed(2)} `;
+      let currentPath = "";
+      history.forEach((sample, index) => {
+        const x = xForMs(sample.simTime * 1000).toFixed(2);
+        currentPath += `${index ? "L" : "M"} ${x} ${yForCurrent(sample.current).toFixed(2)} `;
+        if (index) bridgePath += `V ${yForVoltage(sample.command * gridBusVoltage).toFixed(2)} H ${x} `;
+      });
+      svg.append(makeSvg("path", { d: bridgePath, fill: "none", stroke: "#17231f", "stroke-width": "1.2" }));
+      svg.append(makeSvg("path", { d: currentPath, fill: "none", stroke: "#2874a5", "stroke-width": "2" }));
+      if (gridTripTime !== null) {
+        const last = history[history.length - 1];
+        svg.append(makeSvg("circle", { cx: xForMs(last.simTime * 1000), cy: yForCurrent(last.current), r: "5", fill: "#c84e4e", stroke: "#f9fbf9", "stroke-width": "1.5" }));
+      }
+    }
+    svg.append(makeSvg("line", { x1: left, y1: currentTop, x2: left, y2: voltageBottom, stroke: "#17231f", "stroke-width": "1" }));
+  }
+
+  function gridGameFrame(timestamp) {
+    if (!gridGameRunning) return;
+    const deltaWall = Math.max(0, Math.min((timestamp - gridGameLastFrame) / 1000, .05, gridRoundDuration - gridGameElapsed));
+    gridGameLastFrame = timestamp;
+    const simDelta = deltaWall * gridTimeScale;
+    const substeps = Math.max(1, Math.ceil(simDelta / .0001));
+    const delta = simDelta / substeps;
+    const stepWall = deltaWall / substeps;
+    const inductance = gridRoundInductance / 1000;
+    for (let step = 0; step < substeps; step++) {
+      const gridVoltage = 325 * Math.sin(2 * Math.PI * 50 * gridSimTime);
+      const decay = Math.exp(-gridResistance * delta / inductance);
+      const steadyCurrent = (gridVoltageCommand * gridBusVoltage - gridVoltage) / gridResistance;
+      gridCurrent = gridCurrent * decay + steadyCurrent * (1 - decay);
+      gridSimTime += delta;
+      gridGameElapsed += stepWall;
+      const reference = gridReferenceAt(gridSimTime);
+      const tripped = Math.abs(gridCurrent) >= gridCurrentLimit;
+      if (tripped) gridCurrent = Math.sign(gridCurrent) * gridCurrentLimit;
+      gridQualityIntegral += clamp(1 - Math.abs(gridCurrent - reference) / 12, 0, 1) * stepWall;
+      gridPeakCurrent = Math.max(gridPeakCurrent, Math.abs(gridCurrent));
+      gridSamples.push({ time: gridGameElapsed, current: gridCurrent, reference });
+      gridRoundHistory.push({ simTime: gridSimTime, current: gridCurrent, reference, command: gridVoltageCommand });
+      if (tripped) {
+        gridTripTime = gridSimTime;
+        stopGridGame(true);
+        break;
+      }
+    }
+    if (!gridGameRunning) {
+      updateGridReadouts();
+      drawGridCurrentPlot();
+      return;
+    }
+    gridSamples = gridSamples.filter(sample => sample.time >= gridGameElapsed - 10.1);
+    if (gridGameElapsed >= gridRoundDuration - 1e-9) {
+      gridGameElapsed = gridRoundDuration;
+      updateGridReadouts();
+      drawGridCurrentPlot();
+      stopGridGame(false);
+      return;
+    }
+    updateGridReadouts();
+    drawGridCurrentPlot();
+    if (gridGameRunning) gridGameAnimationFrame = requestAnimationFrame(gridGameFrame);
+  }
+
   function svmStateAt(cyclePosition, carrierPeriods, modulation, angleOffset) {
     const switchingPosition = cyclePosition * carrierPeriods;
     const switchingIndex = Math.floor(switchingPosition);
@@ -1560,6 +2089,7 @@
   const lessonTabs = [...document.querySelectorAll(".lesson-tab")];
   function activateLesson(tab, moveFocus = false) {
     const wasGameSelected = document.querySelector("#tab-game").getAttribute("aria-selected") === "true";
+    const wasGridGameSelected = document.querySelector("#tab-grid-game").getAttribute("aria-selected") === "true";
     lessonTabs.forEach(item => {
       const selected = item === tab;
       item.setAttribute("aria-selected", String(selected));
@@ -1567,7 +2097,13 @@
       document.getElementById(item.getAttribute("aria-controls")).hidden = !selected;
     });
     if (wasGameSelected && tab.id !== "tab-game") pauseGame();
+    if (wasGridGameSelected && tab.id !== "tab-grid-game") pauseGridGame();
     if (tab.id === "tab-game") drawHumanModulator();
+    if (tab.id === "tab-grid-game") {
+      updateGridReadouts();
+      drawGridCurrentPlot();
+      drawGridBridge();
+    }
     if (moveFocus) tab.focus();
   }
   lessonTabs.forEach((tab, index) => {
@@ -1590,14 +2126,31 @@
     if (event.target === event.currentTarget) closeGameResult();
   });
   document.addEventListener("keydown", event => {
-    if (event.key === "Escape" && !document.querySelector("#gameResult").hidden) closeGameResult();
+    if (event.key !== "Escape") return;
+    if (!document.querySelector("#gameResult").hidden) closeGameResult();
+    if (!document.querySelector("#gridResult").hidden) closeGridResult();
+  });
+  document.querySelector("#closeGridResult").addEventListener("click", closeGridResult);
+  document.querySelector("#gridResult").addEventListener("click", event => {
+    if (event.target === event.currentTarget) closeGridResult();
   });
   document.querySelectorAll(".key-vector").forEach(button => button.addEventListener("click", () => selectGameVector(button.dataset.gameVector)));
+  document.querySelector("#gridGameStart").addEventListener("click", startGridGame);
+  document.querySelector("#gridGameReset").addEventListener("click", resetGridGame);
+  document.querySelectorAll(".grid-command").forEach(button => button.addEventListener("click", () => setGridCommand(button.dataset.gridCommand)));
+  [gridInductanceInput, gridReferenceInput].forEach(input => input.addEventListener("input", () => {
+    updateGridReadouts();
+    drawGridBridge();
+  }));
   [gameSpeedInput, gameModulationInput].forEach(input => input.addEventListener("input", () => {
     if (gameRunning) recordGameWaveSample();
     drawHumanModulator();
   }));
-  window.addEventListener("resize", () => drawHumanModulator());
+  window.addEventListener("resize", () => {
+    drawHumanModulator();
+    if (document.querySelector("#tab-grid-game").getAttribute("aria-selected") === "true") drawGridCurrentPlot();
+    if (!document.querySelector("#gridResult").hidden) drawGridResult();
+  });
   document.addEventListener("keydown", event => {
     const activeElement = document.activeElement;
     if (!gameRunning || document.querySelector("#tab-game").getAttribute("aria-selected") !== "true" || activeElement?.matches("input, textarea, select, [contenteditable='true']")) return;
@@ -1605,6 +2158,18 @@
     if (!vectorName) return;
     event.preventDefault();
     selectGameVector(vectorName);
+  });
+  document.addEventListener("keydown", event => {
+    if (!gridGameRunning || document.querySelector("#tab-grid-game").getAttribute("aria-selected") !== "true") return;
+    if (document.activeElement?.matches("input, textarea, select, [contenteditable='true']")) return;
+    const commandByCode = { Numpad6: 1, ArrowUp: 1, Numpad5: 0, Space: 0, Numpad4: -1, ArrowDown: -1 };
+    if (!(event.code in commandByCode)) return;
+    event.preventDefault();
+    if (!event.repeat) setGridCommand(commandByCode[event.code]);
+  });
+  document.addEventListener("keyup", event => {
+    // Space activates a focused button on keyup; block it so Space only means "zero voltage" during a round.
+    if (gridGameRunning && event.code === "Space" && document.querySelector("#tab-grid-game").getAttribute("aria-selected") === "true") event.preventDefault();
   });
   phaseInputs.forEach(input => input.addEventListener("input", updateClarke));
   document.querySelectorAll("[data-transform-preset]").forEach(button => button.addEventListener("click", () => {
@@ -1644,6 +2209,7 @@
   updateSpectrum();
   drawHumanModulator();
   drawCircuit(Number(busInput.value), document.querySelector("#gameCircuitPlot"), gameVector, false, true);
+  resetGridGame();
 </script>
 </body>
 </html>
