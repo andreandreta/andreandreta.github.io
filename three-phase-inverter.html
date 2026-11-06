@@ -95,7 +95,7 @@
     .spectrum-control label { display: block; margin-bottom: 8px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; }
     .spectrum-control input[type="range"] { width: 100%; accent-color: var(--green); }
     .spectrum-control output { display: block; margin-top: 5px; color: var(--green); font-size: 12px; font-weight: 700; }
-    .spectrum-summary { display: grid; grid-template-columns: repeat(4, 1fr); border-bottom: 1px solid var(--line); }
+    .spectrum-summary { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); border-bottom: 1px solid var(--line); }
     .spectrum-metric { padding: 12px 15px; border-right: 1px solid var(--line); }
     .spectrum-metric:last-child { border-right: 0; }
     .spectrum-metric-label { color: var(--muted); font-size: 9px; text-transform: uppercase; }
@@ -130,6 +130,9 @@
     .time-domain-swatch { width: 14px; height: 2px; background: var(--orange); }
     .time-domain-swatch.current { background: var(--blue); }
     .human-game { border: 1px solid var(--ink); border-top: 0; background: var(--panel); }
+    .game-intro { padding: 12px 17px; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 10px; line-height: 1.65; }
+    .game-intro strong { color: var(--ink); }
+    .game-key-guide { display: block; margin-top: 4px; color: var(--ink); font-size: 9px; }
     .game-layout { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr) minmax(300px, .75fr); }
     .game-visuals { display: contents; }
     .game-plot-wrap { min-width: 0; padding: 14px 18px; background-color: #f7faf7; background-image: linear-gradient(#e9efeb 1px, transparent 1px), linear-gradient(90deg, #e9efeb 1px, transparent 1px); background-size: 24px 24px; }
@@ -302,9 +305,10 @@
       .spectrum-controls { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .spectrum-control:nth-child(2) { border-right: 0; }
       .spectrum-control:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
-      .spectrum-summary { grid-template-columns: repeat(2, 1fr); }
+      .spectrum-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .spectrum-metric:nth-child(2) { border-right: 0; }
-      .spectrum-metric:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
+      .spectrum-metric:nth-child(-n+4) { border-bottom: 1px solid var(--line); }
+      .spectrum-metric:nth-child(5) { grid-column: 1 / -1; }
       .spectrum-body { grid-template-columns: 1fr; }
       .spectrum-side { border-left: 0; border-top: 1px solid var(--line); }
       .time-domain-controls { gap: 7px; }
@@ -471,6 +475,7 @@
       <div class="spectrum-summary" aria-live="polite">
         <div class="spectrum-metric"><span class="spectrum-metric-label">Voltage fundamental</span><output id="voltageFundamental" class="spectrum-metric-value">—</output></div>
         <div class="spectrum-metric"><span class="spectrum-metric-label">Current fundamental</span><output id="currentFundamental" class="spectrum-metric-value">—</output></div>
+        <div class="spectrum-metric"><span class="spectrum-metric-label">Voltage THD · ≤25 kHz</span><output id="voltageThd" class="spectrum-metric-value">—</output></div>
         <div class="spectrum-metric"><span class="spectrum-metric-label">Current THD · ≤25 kHz</span><output id="currentThd" class="spectrum-metric-value">—</output></div>
         <div class="spectrum-metric"><span class="spectrum-metric-label">PWM carrier ratio</span><output id="carrierRatio" class="spectrum-metric-value">—</output></div>
       </div>
@@ -503,6 +508,10 @@
     </section>
     <section class="human-game" id="gameLesson" role="tabpanel" aria-labelledby="tab-game" hidden>
       <div class="panel-head"><span class="panel-title">Human modulator / rotating voltage reference</span><span class="panel-tag">30 SECOND ROUND · ROTATING αβ REFERENCE</span></div>
+      <div class="game-intro">
+        <strong>What if you were the modulator?</strong> Take control of a three-phase inverter and choose its switch state in real time. Follow the rotating αβ reference as closely as you can; each key applies one discrete voltage vector, so your job is to pick the best available match.
+        <span class="game-key-guide">Numpad: 6 → V1 · 9 → V2 · 7 → V3 · 4 → V4 · 1 → V5 · 3 → V6 · 5 → V0 · 8 → V7. Press Start round, then use the numpad.</span>
+      </div>
       <div class="game-layout">
         <div class="game-visuals">
           <div class="game-plot-wrap"><svg id="humanModPlot" viewBox="0 0 620 500" role="img" aria-label="Rotating alpha beta reference and the currently selected inverter voltage vector"></svg></div>
@@ -1389,10 +1398,14 @@
     latestSpectrum = spectrum;
     const voltageFundamental = spectrum.voltageSpectrum[1];
     const currentFundamental = spectrum.currentSpectrum[1];
-    const currentHarmonicEnergy = spectrum.currentSpectrum.slice(2, Math.floor(25000 / 50) + 1).reduce((sum, value) => sum + value * value, 0);
+    const maxThdBin = Math.min(spectrum.voltageSpectrum.length - 1, Math.floor(25000 / spectrum.binHz));
+    const voltageHarmonicEnergy = spectrum.voltageSpectrum.slice(2, maxThdBin + 1).reduce((sum, value) => sum + value * value, 0);
+    const currentHarmonicEnergy = spectrum.currentSpectrum.slice(2, maxThdBin + 1).reduce((sum, value) => sum + value * value, 0);
+    const voltageThd = voltageFundamental > 0 ? 100 * Math.sqrt(voltageHarmonicEnergy) / voltageFundamental : 0;
     const currentThd = currentFundamental > 0 ? 100 * Math.sqrt(currentHarmonicEnergy) / currentFundamental : 0;
     document.querySelector("#voltageFundamental").textContent = `${fixed(voltageFundamental, 2)} V rms`;
     document.querySelector("#currentFundamental").textContent = `${fixed(currentFundamental, 2)} A rms`;
+    document.querySelector("#voltageThd").textContent = `${fixed(voltageThd, 1)}%`;
     document.querySelector("#currentThd").textContent = `${fixed(currentThd, 1)}%`;
     document.querySelector("#carrierRatio").textContent = `${spectrum.carrierPeriods}:1`;
     const { data } = drawSpectrum(spectrum);
@@ -1401,7 +1414,7 @@
     const peak = data[1];
     const theoreticalVoltage = modulation * busInput.value / Math.sqrt(6);
     const theoreticalCurrent = theoreticalVoltage / Math.hypot(spectrum.resistance, 2 * Math.PI * 50 * spectrum.inductance);
-    document.querySelector("#spectrumModelNote").textContent = `Centered seven-segment SVM; reference held once per switching period; periodic steady-state RL current; ${sampleCountLabel()} samples/cycle at 50 Hz (${fixed(spectrum.binHz, 0)} Hz FFT bins). Even 50 Hz harmonics are suppressed by half-wave symmetry; carrier multiples such as 2fs remain. Low fs can leave small odd low-order spurs. Current THD sums bins 100 Hz–25 kHz. Fundamental check: V1 = ${fixed(theoreticalVoltage, 2)} V rms, I1 = ${fixed(theoreticalCurrent, 2)} A rms. Displayed ${spectrumMode} fundamental: ${fixed(peak, 2)} ${signalUnit}.`;
+    document.querySelector("#spectrumModelNote").textContent = `Centered seven-segment SVM; reference held once per switching period; periodic steady-state RL current; ${sampleCountLabel()} samples/cycle at 50 Hz (${fixed(spectrum.binHz, 0)} Hz FFT bins). Voltage and current THD sum harmonic bins from 100 Hz to 25 kHz, excluding the fundamental. Even 50 Hz harmonics are suppressed by half-wave symmetry; carrier multiples such as 2fs remain. Low fs can leave small odd low-order spurs. Fundamental check: V1 = ${fixed(theoreticalVoltage, 2)} V rms, I1 = ${fixed(theoreticalCurrent, 2)} A rms. Displayed ${spectrumMode} fundamental: ${fixed(peak, 2)} ${signalUnit}.`;
   }
 
   function sampleCountLabel() {
